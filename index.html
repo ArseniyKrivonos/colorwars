@@ -335,6 +335,7 @@ body.tg {
     overflow: hidden;
     box-shadow: 0 4px 8px rgba(0,0,0,0.2);
     aspect-ratio: 1 / 1;
+    cursor: pointer;
 }
 
 .cell:active {
@@ -351,7 +352,7 @@ body.tg {
     border-color: #ffc0ce;
 }
 
-/* Контейнер для точек — используем CSS Grid для красивого расположения */
+/* Контейнер для точек */
 .dots {
     position: absolute;
     inset: 0;
@@ -381,52 +382,34 @@ body.tg {
     100% { transform: scale(1); opacity: 1; }
 }
 
-/* Расположение точек в зависимости от количества */
-.dots-1 {
-    grid-template-columns: 1fr;
-    grid-template-rows: 1fr;
-}
+/* Расположение точек красивыми узорами */
+.dots-1 { grid-template-columns: 1fr; grid-template-rows: 1fr; }
 .dots-1 .dot { grid-column: 1; grid-row: 1; }
 
-.dots-2 {
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: 1fr;
-}
+.dots-2 { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr; }
 .dots-2 .dot:nth-child(1) { grid-column: 1; }
 .dots-2 .dot:nth-child(2) { grid-column: 2; }
 
-.dots-3 {
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: 1fr 1fr;
-}
+.dots-3 { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; }
 .dots-3 .dot:nth-child(1) { grid-column: 1; grid-row: 1; }
 .dots-3 .dot:nth-child(2) { grid-column: 2; grid-row: 1; }
 .dots-3 .dot:nth-child(3) { grid-column: 1 / span 2; grid-row: 2; justify-self: center; width: 50%; }
 
-.dots-4 {
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: 1fr 1fr;
-}
+.dots-4 { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; }
 .dots-4 .dot { width: 80%; height: 80%; }
 .dots-4 .dot:nth-child(1) { grid-column: 1; grid-row: 1; }
 .dots-4 .dot:nth-child(2) { grid-column: 2; grid-row: 1; }
 .dots-4 .dot:nth-child(3) { grid-column: 1; grid-row: 2; }
 .dots-4 .dot:nth-child(4) { grid-column: 2; grid-row: 2; }
 
-.dots-5 {
-    grid-template-columns: 1fr 1fr 1fr;
-    grid-template-rows: 1fr 1fr 1fr;
-}
+.dots-5 { grid-template-columns: 1fr 1fr 1fr; grid-template-rows: 1fr 1fr 1fr; }
 .dots-5 .dot:nth-child(1) { grid-column: 2; grid-row: 1; }
 .dots-5 .dot:nth-child(2) { grid-column: 1; grid-row: 2; }
 .dots-5 .dot:nth-child(3) { grid-column: 2; grid-row: 2; }
 .dots-5 .dot:nth-child(4) { grid-column: 3; grid-row: 2; }
 .dots-5 .dot:nth-child(5) { grid-column: 2; grid-row: 3; }
 
-.dots-6 {
-    grid-template-columns: 1fr 1fr 1fr;
-    grid-template-rows: 1fr 1fr;
-}
+.dots-6 { grid-template-columns: 1fr 1fr 1fr; grid-template-rows: 1fr 1fr; }
 .dots-6 .dot:nth-child(1) { grid-column: 1; grid-row: 1; }
 .dots-6 .dot:nth-child(2) { grid-column: 2; grid-row: 1; }
 .dots-6 .dot:nth-child(3) { grid-column: 3; grid-row: 1; }
@@ -434,10 +417,7 @@ body.tg {
 .dots-6 .dot:nth-child(5) { grid-column: 2; grid-row: 2; }
 .dots-6 .dot:nth-child(6) { grid-column: 3; grid-row: 2; }
 
-.dots-7 {
-    grid-template-columns: 1fr 1fr 1fr;
-    grid-template-rows: 1fr 1fr 1fr;
-}
+.dots-7 { grid-template-columns: 1fr 1fr 1fr; grid-template-rows: 1fr 1fr 1fr; }
 .dots-7 .dot:nth-child(1) { grid-column: 1; grid-row: 1; }
 .dots-7 .dot:nth-child(2) { grid-column: 3; grid-row: 1; }
 .dots-7 .dot:nth-child(3) { grid-column: 1; grid-row: 2; }
@@ -446,10 +426,7 @@ body.tg {
 .dots-7 .dot:nth-child(6) { grid-column: 1; grid-row: 3; }
 .dots-7 .dot:nth-child(7) { grid-column: 3; grid-row: 3; }
 
-.dots-8 {
-    grid-template-columns: 1fr 1fr 1fr;
-    grid-template-rows: 1fr 1fr 1fr;
-}
+.dots-8 { grid-template-columns: 1fr 1fr 1fr; grid-template-rows: 1fr 1fr 1fr; }
 .dots-8 .dot:nth-child(1) { grid-column: 1; grid-row: 1; }
 .dots-8 .dot:nth-child(2) { grid-column: 2; grid-row: 1; }
 .dots-8 .dot:nth-child(3) { grid-column: 3; grid-row: 1; }
@@ -459,42 +436,59 @@ body.tg {
 .dots-8 .dot:nth-child(7) { grid-column: 2; grid-row: 3; }
 .dots-8 .dot:nth-child(8) { grid-column: 3; grid-row: 3; }
 
-/* Анимация взрыва */
-.flash-overlay {
+/* Анимация взрыва — яркая и наглядная */
+.explosion-flash {
     position: absolute;
     inset: 0;
-    background: rgba(255, 255, 200, 0.7);
+    background: radial-gradient(circle, #fff9c4, #ffaa33);
     border-radius: inherit;
-    animation: flashAnim 0.2s forwards;
+    animation: explosionFlashAnim 0.35s forwards;
     pointer-events: none;
+    z-index: 5;
 }
 
-@keyframes flashAnim {
-    0% { opacity: 0.8; transform: scale(0.9); }
-    100% { opacity: 0; transform: scale(1.3); }
+@keyframes explosionFlashAnim {
+    0% { opacity: 1; transform: scale(0.8); background: #fff9c4; }
+    50% { opacity: 0.9; transform: scale(1.2); background: #ffcc44; }
+    100% { opacity: 0; transform: scale(1.5); background: #ff8800; }
 }
 
-.explode-particle {
+/* Частицы, разлетающиеся при взрыве */
+.shrapnel {
     position: absolute;
-    width: 25%;
-    height: 25%;
-    background: radial-gradient(circle, #fff9c4, #ffd966);
+    width: 20%;
+    height: 20%;
+    background: radial-gradient(circle, #ffeeaa, #ffaa44);
     border-radius: 50%;
-    filter: blur(2px);
     pointer-events: none;
-    z-index: 10;
-    animation: particleFly 0.3s forwards ease-out;
+    z-index: 6;
+    animation: shrapnelFly 0.4s forwards ease-out;
 }
 
-@keyframes particleFly {
+@keyframes shrapnelFly {
     0% {
         transform: scale(0.3) translate(0, 0);
         opacity: 0.9;
     }
     100% {
-        transform: scale(1.5) translate(var(--tx, 30px), var(--ty, 30px));
+        transform: scale(1.2) translate(var(--tx, 40px), var(--ty, 40px));
         opacity: 0;
     }
+}
+
+/* Вспышка при добавлении точки */
+.point-flash {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle, rgba(255,255,200,0.8), rgba(255,200,100,0));
+    border-radius: inherit;
+    animation: pointFlashAnim 0.2s forwards;
+    pointer-events: none;
+}
+
+@keyframes pointFlashAnim {
+    0% { opacity: 0.7; transform: scale(0.8); }
+    100% { opacity: 0; transform: scale(1.3); }
 }
 
 .popup {
@@ -571,8 +565,8 @@ body.tg {
         <div class="top">
             <div class="title">COLOR<br>WARS</div>
             <div class="stats">
-                <div class="card"><div class="card-title">ТЫ</div><div class="card-score" id="playerScore">1</div></div>
-                <div class="card"><div class="card-title">БОТ</div><div class="card-score" id="botScore">1</div></div>
+                <div class="card"><div class="card-title">ТЫ</div><div class="card-score" id="playerScore">0</div></div>
+                <div class="card"><div class="card-title">БОТ</div><div class="card-score" id="botScore">0</div></div>
             </div>
         </div>
         <div class="controls">
@@ -603,8 +597,7 @@ let board = [];
 let turn = "player";
 let gameOver = false;
 let difficulty = "easy";
-let firstMoveDone = false; // флаг для первого хода бота
-const SPEED = { easy: 680, medium: 380, hard: 180 };
+const SPEED = { easy: 850, medium: 550, hard: 350 }; // медленнее для наглядности
 
 const boardEl = document.getElementById("board");
 const startScreen = document.getElementById("startScreen");
@@ -614,6 +607,7 @@ const botScoreEl = document.getElementById("botScore");
 const turnText = document.getElementById("turnText");
 const restartBtn = document.getElementById("restart");
 
+// ПОЛНОСТЬЮ ПУСТОЕ ПОЛЕ — нет начальных клеток
 function createEmptyBoard() {
     const newBoard = [];
     for(let y = 0; y < SIZE; y++) {
@@ -623,75 +617,74 @@ function createEmptyBoard() {
         }
         newBoard.push(row);
     }
-    newBoard[0][0] = { owner: "player", value: 1 };
-    newBoard[SIZE-1][SIZE-1] = { owner: "bot", value: 1 };
     return newBoard;
 }
 
 function initGame() {
     gameOver = false;
-    firstMoveDone = false;
     turn = "player";
     board = createEmptyBoard();
     render();
-    // Если это не перезапуск из игры, а старт — бот ходит первым
-    // Вызываем бота с небольшой задержкой после отрисовки
-    if (!gameOver && turn === "player") {
-        clearBotTimer();
-        botTimer = setTimeout(() => {
-            if (!gameOver && !firstMoveDone && turn === "player") {
-                firstMoveDone = true;
-                botMove();
-            }
-        }, 400);
-    }
 }
 
-function addFlash(x, y) {
+// Визуальные эффекты
+function addPointFlash(x, y) {
     const cells = document.querySelectorAll("#board .cell");
     const idx = y * SIZE + x;
     if(cells[idx]) {
         const flash = document.createElement("div");
-        flash.className = "flash-overlay";
+        flash.className = "point-flash";
         cells[idx].style.position = "relative";
         cells[idx].appendChild(flash);
         setTimeout(() => flash.remove(), 200);
     }
 }
 
-function spawnExplodeParticles(x, y) {
+function addExplosionFlash(x, y) {
     const cells = document.querySelectorAll("#board .cell");
     const idx = y * SIZE + x;
-    if(!cells[idx]) return;
-    for(let i = 0; i < 8; i++) {
-        const angle = Math.random() * Math.PI * 2;
-        const dist = 20 + Math.random() * 35;
-        const tx = Math.cos(angle) * dist;
-        const ty = Math.sin(angle) * dist;
-        const particle = document.createElement("div");
-        particle.className = "explode-particle";
-        particle.style.left = "50%";
-        particle.style.top = "50%";
-        particle.style.transform = "translate(-50%, -50%)";
-        particle.style.setProperty('--tx', tx + 'px');
-        particle.style.setProperty('--ty', ty + 'px');
+    if(cells[idx]) {
+        const flash = document.createElement("div");
+        flash.className = "explosion-flash";
         cells[idx].style.position = "relative";
-        cells[idx].appendChild(particle);
-        setTimeout(() => particle.remove(), 300);
+        cells[idx].appendChild(flash);
+        setTimeout(() => flash.remove(), 350);
+        
+        // Добавляем разлетающиеся частицы
+        for(let i = 0; i < 12; i++) {
+            const angle = Math.random() * Math.PI * 2;
+            const dist = 25 + Math.random() * 45;
+            const tx = Math.cos(angle) * dist;
+            const ty = Math.sin(angle) * dist;
+            const shrap = document.createElement("div");
+            shrap.className = "shrapnel";
+            shrap.style.left = "50%";
+            shrap.style.top = "50%";
+            shrap.style.transform = "translate(-50%, -50%)";
+            shrap.style.setProperty('--tx', tx + 'px');
+            shrap.style.setProperty('--ty', ty + 'px');
+            cells[idx].appendChild(shrap);
+            setTimeout(() => shrap.remove(), 400);
+        }
     }
 }
 
+// КАСКАДНЫЙ ВЗРЫВ С ЗАДЕРЖКАМИ ДЛЯ НАГЛЯДНОСТИ
 async function cascadeExplode(x, y, owner, visited = new Set()) {
     const key = `${x},${y}`;
     if(visited.has(key)) return;
     visited.add(key);
     const cell = board[y][x];
     if(!cell) return;
+    
     if(cell.value >= 4) {
-        spawnExplodeParticles(x, y);
-        await new Promise(r => setTimeout(r, 30));
+        // Показываем взрыв на этой клетке
+        addExplosionFlash(x, y);
+        await new Promise(r => setTimeout(r, 120)); // пауза, чтобы увидеть взрыв
+        
         cell.value = 0;
         cell.owner = null;
+        
         const dirs = [[1,0], [-1,0], [0,1], [0,-1]];
         for(const [dx, dy] of dirs) {
             const nx = x + dx;
@@ -700,6 +693,9 @@ async function cascadeExplode(x, y, owner, visited = new Set()) {
                 const neighbor = board[ny][nx];
                 neighbor.owner = owner;
                 neighbor.value++;
+                addPointFlash(nx, ny); // показываем добавление точки в соседа
+                await new Promise(r => setTimeout(r, 60)); // задержка для наглядности
+                
                 if(neighbor.value >= 4 && !visited.has(`${nx},${ny}`)) {
                     await cascadeExplode(nx, ny, owner, visited);
                 }
@@ -708,12 +704,19 @@ async function cascadeExplode(x, y, owner, visited = new Set()) {
     }
 }
 
-async function actionWithExplode(x, y, owner) {
+async function performAction(x, y, owner) {
     const cell = board[y][x];
+    if(!cell) return false;
+    
+    // Нельзя ходить на клетку противника
     if(owner === "player" && cell.owner === "bot") return false;
+    if(owner === "bot" && cell.owner === "player") return false;
+    
     cell.owner = owner;
     cell.value++;
-    addFlash(x, y);
+    addPointFlash(x, y);
+    await new Promise(r => setTimeout(r, 80)); // пауза для видимости
+    
     if(cell.value >= 4) {
         await cascadeExplode(x, y, owner);
     }
@@ -732,18 +735,21 @@ function getDotClass(value) {
     return "dots-8";
 }
 
-function render() {
+async function render() {
     boardEl.innerHTML = "";
     boardEl.className = SIZE === 8 ? "board-grid-8" : "board-grid-5";
     let playerCount = 0, botCount = 0;
+    
     for(let y = 0; y < SIZE; y++) {
         for(let x = 0; x < SIZE; x++) {
             const cell = board[y][x];
             if(cell.owner === "player") playerCount++;
             if(cell.owner === "bot") botCount++;
+            
             const div = document.createElement("div");
             div.className = "cell";
             if(cell.owner) div.classList.add(cell.owner);
+            
             const dotsContainer = document.createElement("div");
             const dotCount = Math.min(cell.value, 8);
             const dotClass = getDotClass(cell.value);
@@ -758,12 +764,17 @@ function render() {
             boardEl.appendChild(div);
         }
     }
+    
     playerScoreEl.textContent = playerCount;
     botScoreEl.textContent = botCount;
-    turnText.textContent = turn === "player" ? "ТВОЙ ХОД" : "БОТ ДУМАЕТ...";
+    turnText.textContent = turn === "player" ? "✨ ТВОЙ ХОД ✨" : "🤖 БОТ ДУМАЕТ...";
+    
     if(!gameOver) {
-        if(playerCount === 0) endGame("ПОБЕДИЛ БОТ");
-        else if(botCount === 0) endGame("ТЫ ПОБЕДИЛ");
+        if(playerCount === 0 && botCount > 0) endGame("🤖 ПОБЕДА БОТА");
+        else if(botCount === 0 && playerCount > 0) endGame("🏆 ТЫ ПОБЕДИЛ!");
+        else if(playerCount === 0 && botCount === 0 && turn === "bot") {
+            // Ничья — не бывает, просто пропускаем
+        }
     }
 }
 
@@ -773,40 +784,47 @@ function clearBotTimer() { if(botTimer) { clearTimeout(botTimer); botTimer = nul
 async function onCellClick(x, y) {
     if(gameOver) return;
     if(turn !== "player") return;
+    
     const cell = board[y][x];
     if(cell.owner === "bot") return;
-    const success = await actionWithExplode(x, y, "player");
+    
+    const success = await performAction(x, y, "player");
     if(!success) return;
+    
+    await render();
+    
+    // Проверка победы
     let p = 0, b = 0;
     for(let i=0;i<SIZE;i++) for(let j=0;j<SIZE;j++) {
         if(board[i][j].owner === "player") p++;
         if(board[i][j].owner === "bot") b++;
     }
-    render();
     if(p === 0 || b === 0) return;
+    
     turn = "bot";
-    render();
+    await render();
     clearBotTimer();
     botTimer = setTimeout(() => botMove(), SPEED[difficulty]);
 }
 
-function botMove() {
+async function botMove() {
     if(gameOver) return;
     if(turn !== "bot") return;
+    
     let variants = [];
     for(let y = 0; y < SIZE; y++) {
         for(let x = 0; x < SIZE; x++) {
             const c = board[y][x];
             if(c.owner === "bot" || c.owner === null) {
-                let score = Math.random();
-                if(difficulty === "medium") score += c.value * 2;
+                let score = Math.random() * 3;
+                if(difficulty === "medium") score += c.value * 2.5;
                 if(difficulty === "hard") {
-                    score += c.value * 4;
+                    score += c.value * 5;
                     const dirs = [[1,0],[-1,0],[0,1],[0,-1]];
                     for(const [dx, dy] of dirs) {
                         const nx = x+dx, ny = y+dy;
                         if(nx>=0 && ny>=0 && nx<SIZE && ny<SIZE && board[ny][nx].owner === "player") {
-                            score += 6;
+                            score += 8;
                             break;
                         }
                     }
@@ -815,22 +833,26 @@ function botMove() {
             }
         }
     }
+    
     if(variants.length === 0) { turn = "player"; render(); return; }
+    
     variants.sort((a,b) => b.score - a.score);
     const best = variants[0];
-    actionWithExplode(best.x, best.y, "bot").then(() => {
-        let p = 0, b = 0;
-        for(let i=0;i<SIZE;i++) for(let j=0;j<SIZE;j++) {
-            if(board[i][j].owner === "player") p++;
-            if(board[i][j].owner === "bot") b++;
-        }
-        render();
-        if(p === 0 || b === 0) return;
-        turn = "player";
-        render();
-        clearBotTimer();
-        botTimer = null;
-    });
+    
+    await performAction(best.x, best.y, "bot");
+    await render();
+    
+    let p = 0, b = 0;
+    for(let i=0;i<SIZE;i++) for(let j=0;j<SIZE;j++) {
+        if(board[i][j].owner === "player") p++;
+        if(board[i][j].owner === "bot") b++;
+    }
+    if(p === 0 || b === 0) return;
+    
+    turn = "player";
+    await render();
+    clearBotTimer();
+    botTimer = null;
 }
 
 function endGame(text) {
