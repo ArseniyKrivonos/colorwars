@@ -578,7 +578,10 @@ let turn = "player";
 let gameOver = false;
 let difficulty = "easy";
 let pendingEndCheck = false;
-const SPEED = { easy: 850, medium: 550, hard: 350 };
+let botTimer = null;
+let isBotThinking = false;
+
+const SPEED = { easy: 800, medium: 500, hard: 300 };
 
 const boardEl = document.getElementById("board");
 const startScreen = document.getElementById("startScreen");
@@ -603,8 +606,11 @@ function createEmptyBoard() {
 function initGame() {
     gameOver = false;
     pendingEndCheck = false;
+    isBotThinking = false;
     turn = "player";
     board = createEmptyBoard();
+    if(botTimer) clearTimeout(botTimer);
+    botTimer = null;
     render();
 }
 
@@ -657,7 +663,7 @@ async function cascadeExplode(x, y, owner, visited = new Set()) {
     
     if(cell.value >= 4) {
         addExplosionFlash(x, y);
-        await new Promise(r => setTimeout(r, 120));
+        await new Promise(r => setTimeout(r, 100));
         
         cell.value = 0;
         cell.owner = null;
@@ -671,7 +677,7 @@ async function cascadeExplode(x, y, owner, visited = new Set()) {
                 neighbor.owner = owner;
                 neighbor.value++;
                 addPointFlash(nx, ny);
-                await new Promise(r => setTimeout(r, 60));
+                await new Promise(r => setTimeout(r, 50));
                 
                 if(neighbor.value >= 4 && !visited.has(`${nx},${ny}`)) {
                     await cascadeExplode(nx, ny, owner, visited);
@@ -690,7 +696,7 @@ async function performAction(x, y, owner) {
     cell.owner = owner;
     cell.value++;
     addPointFlash(x, y);
-    await new Promise(r => setTimeout(r, 80));
+    await new Promise(r => setTimeout(r, 70));
     
     if(cell.value >= 4) {
         await cascadeExplode(x, y, owner);
@@ -753,11 +759,10 @@ async function render() {
     turnText.textContent = turn === "player" ? "✨ ТВОЙ ХОД ✨" : "🤖 БОТ ДУМАЕТ...";
 }
 
-async function checkWinAfterDelay() {
+async function checkWinWithDelay() {
     if(pendingEndCheck) return;
     pendingEndCheck = true;
     
-    // Ждем 0.5 секунды, чтобы все анимации завершились
     await new Promise(r => setTimeout(r, 500));
     
     if(gameOver) {
@@ -782,12 +787,10 @@ async function checkWinAfterDelay() {
     pendingEndCheck = false;
 }
 
-let botTimer = null;
-function clearBotTimer() { if(botTimer) { clearTimeout(botTimer); botTimer = null; } }
-
 async function onCellClick(x, y) {
     if(gameOver) return;
     if(turn !== "player") return;
+    if(isBotThinking) return;
     
     const cell = board[y][x];
     if(cell.owner === "bot") return;
@@ -799,19 +802,31 @@ async function onCellClick(x, y) {
     
     const { playerCount, botCount } = getCounts();
     if(playerCount === 0 || botCount === 0) {
-        await checkWinAfterDelay();
+        await checkWinWithDelay();
         return;
     }
     
+    // Передаем ход боту
     turn = "bot";
     await render();
-    clearBotTimer();
-    botTimer = setTimeout(() => botMove(), SPEED[difficulty]);
+    
+    // Запускаем бота через небольшую задержку
+    if(botTimer) clearTimeout(botTimer);
+    botTimer = setTimeout(() => {
+        botMove();
+    }, 200);
 }
 
 async function botMove() {
     if(gameOver) return;
     if(turn !== "bot") return;
+    if(isBotThinking) return;
+    
+    isBotThinking = true;
+    turnText.textContent = "🤖 БОТ ДУМАЕТ...";
+    
+    // Небольшая задержка для имитации мышления
+    await new Promise(r => setTimeout(r, 100));
     
     let variants = [];
     for(let y = 0; y < SIZE; y++) {
@@ -836,7 +851,12 @@ async function botMove() {
         }
     }
     
-    if(variants.length === 0) { turn = "player"; render(); return; }
+    if(variants.length === 0) {
+        turn = "player";
+        isBotThinking = false;
+        await render();
+        return;
+    }
     
     variants.sort((a,b) => b.score - a.score);
     const best = variants[0];
@@ -846,20 +866,25 @@ async function botMove() {
     
     const { playerCount, botCount } = getCounts();
     if(playerCount === 0 || botCount === 0) {
-        await checkWinAfterDelay();
+        isBotThinking = false;
+        await checkWinWithDelay();
         return;
     }
     
     turn = "player";
+    isBotThinking = false;
     await render();
-    clearBotTimer();
+    
+    if(botTimer) clearTimeout(botTimer);
     botTimer = null;
 }
 
 function endGame(text) {
     if(gameOver) return;
     gameOver = true;
-    clearBotTimer();
+    if(botTimer) clearTimeout(botTimer);
+    isBotThinking = false;
+    
     const popupDiv = document.createElement("div");
     popupDiv.className = "popup";
     popupDiv.innerHTML = `
@@ -878,6 +903,7 @@ function endGame(text) {
 
 function restartGame() {
     if(botTimer) clearTimeout(botTimer);
+    isBotThinking = false;
     initGame();
 }
 
