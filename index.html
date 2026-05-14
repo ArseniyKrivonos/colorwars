@@ -2,1218 +2,778 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8" />
-
 <meta
-name="viewport"
-content="
-width=device-width,
-initial-scale=1,
-maximum-scale=1,
-user-scalable=no,
-viewport-fit=cover
-"
+    name="viewport"
+    content="
+        width=device-width,
+        initial-scale=1,
+        maximum-scale=1,
+        user-scalable=no,
+        viewport-fit=cover
+    "
 />
-
-<title>Color Wars</title>
-
+<title>Цветные Войны — захвати поле</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
-
 <style>
-
-:root{
-
-    --bg1:#efe7ff;
-    --bg2:#d8c7ff;
-    --bg3:#b89cff;
-
-    --player:#79a7ff;
-    --playerGlow:#9dc0ff;
-
-    --bot:#ff89b0;
-    --botGlow:#ffb1ca;
-
-    --cell:#ffffff;
-    --cellBorder:#e6ddff;
-
-    --text:#3b2a5a;
-
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
 }
 
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-
-    -webkit-tap-highlight-color:transparent;
-    user-select:none;
+html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    touch-action: manipulation;
+    background: #0d0717;
 }
 
-html,
-body{
-    width:100%;
-    height:100%;
-    overflow:hidden;
-    font-family:
-        Inter,
-        Arial,
-        sans-serif;
-
-    background:
-        linear-gradient(
-            180deg,
-            var(--bg1),
-            var(--bg2),
-            var(--bg3)
-        );
+body {
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, sans-serif;
+    background: radial-gradient(circle at 30% 10%, #2a1a42, #0c0820);
+    color: white;
 }
 
-body{
-    display:flex;
-    justify-content:center;
-    align-items:center;
+/* Telegram адаптация */
+body.tg {
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
 }
 
-#app{
-    width:100vw;
-    height:100vh;
-    position:relative;
-    overflow:hidden;
+#app {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
 }
 
-/* BACKGROUND */
-
-.bg-circle{
-    position:absolute;
-    border-radius:50%;
-    filter:blur(70px);
-    opacity:0.45;
-    pointer-events:none;
+/* --- СТАРТОВЫЙ ЭКРАН (ПЕРВЫЙ, КРАСИВЫЙ) --- */
+.start-screen {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    background: radial-gradient(ellipse at 50% 30%, #2e1a4a, #0a0512);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(2px);
+    transition: opacity 0.6s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+    opacity: 1;
 }
 
-.bg1{
-    width:55vw;
-    height:55vw;
-    background:#ffffff;
-    top:-10vw;
-    left:-10vw;
+.start-screen.fade-out {
+    opacity: 0;
+    pointer-events: none;
 }
 
-.bg2{
-    width:60vw;
-    height:60vw;
-    background:#ffd2ea;
-    right:-15vw;
-    bottom:-15vw;
+.start-card {
+    width: min(88vw, 460px);
+    background: rgba(30, 18, 48, 0.65);
+    backdrop-filter: blur(20px);
+    border-radius: 64px;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    padding: 2rem 1.8rem 2.5rem;
+    text-align: center;
+    box-shadow: 0 30px 40px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255,255,255,0.05);
+    transition: transform 0.3s ease;
 }
 
-/* MENU */
-
-#menu{
-    position:absolute;
-    inset:0;
-
-    display:flex;
-    justify-content:center;
-    align-items:center;
-
-    padding:24px;
+.start-title {
+    font-size: clamp(48px, 14vw, 82px);
+    font-weight: 900;
+    letter-spacing: 4px;
+    line-height: 1;
+    background: linear-gradient(135deg, #FFF9C4, #FFD966, #FFB347);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    margin-bottom: 0.5rem;
 }
 
-.menu-card{
-
-    width:min(92vw,430px);
-
-    background:
-        rgba(255,255,255,0.55);
-
-    backdrop-filter:blur(20px);
-
-    border:
-        1px solid rgba(255,255,255,0.7);
-
-    border-radius:40px;
-
-    padding:30px 24px;
-
-    box-shadow:
-        0 20px 40px rgba(92,58,142,0.18);
-
-    animation:show 0.6s ease;
+.start-sub {
+    font-size: 14px;
+    opacity: 0.7;
+    letter-spacing: 2px;
+    margin-bottom: 28px;
 }
 
-@keyframes show{
+.difficulty-panel {
+    display: flex;
+    gap: 14px;
+    justify-content: center;
+    margin: 32px 0 28px;
+    flex-wrap: wrap;
+}
 
-    from{
-        opacity:0;
-        transform:translateY(25px);
+.diff-btn {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 60px;
+    padding: 12px 18px;
+    font-weight: 800;
+    font-size: 16px;
+    letter-spacing: 1px;
+    color: #f0eef5;
+    backdrop-filter: blur(4px);
+    transition: all 0.2s;
+    cursor: pointer;
+    min-width: 100px;
+}
+
+.diff-btn.active {
+    background: #FFD966;
+    color: #1f112c;
+    border-color: #fff1b0;
+    box-shadow: 0 0 12px rgba(255, 217, 0, 0.6);
+}
+
+.start-btn {
+    background: linear-gradient(105deg, #8f6eff, #5a3bc2);
+    border: none;
+    border-radius: 60px;
+    padding: 16px 0;
+    width: 100%;
+    font-size: 22px;
+    font-weight: 800;
+    color: white;
+    margin-top: 12px;
+    cursor: pointer;
+    transition: 0.15s;
+    box-shadow: 0 6px 0 #2e1c5a;
+}
+
+.start-btn:active {
+    transform: translateY(2px);
+    box-shadow: 0 3px 0 #2e1c5a;
+}
+
+/* --- ОСНОВНОЙ ИГРОВОЙ ИНТЕРФЕЙС --- */
+.game-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    opacity: 0;
+    transition: opacity 0.45s ease;
+    pointer-events: none;
+    height: 100%;
+}
+
+.game-container.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.top-bar {
+    padding: max(18px, env(safe-area-inset-top)) 20px 8px;
+}
+
+.game-title {
+    font-size: clamp(28px, 6vw, 42px);
+    font-weight: 800;
+    text-align: center;
+    letter-spacing: 2px;
+    background: linear-gradient(130deg, #FFE6B0, #FFC857);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+.stats-row {
+    display: flex;
+    gap: 16px;
+    margin-top: 12px;
+}
+
+.stat-block {
+    flex: 1;
+    background: rgba(255,255,255,0.1);
+    backdrop-filter: blur(12px);
+    border-radius: 28px;
+    padding: 10px 0;
+    text-align: center;
+    border: 1px solid rgba(255,255,255,0.2);
+}
+
+.stat-label {
+    font-size: 13px;
+    font-weight: 500;
+    opacity: 0.75;
+}
+
+.stat-value {
+    font-size: 34px;
+    font-weight: 800;
+    line-height: 1.1;
+}
+
+.quick-controls {
+    display: flex;
+    gap: 10px;
+    padding: 10px 20px 0;
+}
+
+.diff-tag {
+    flex: 1;
+    background: rgba(0,0,0,0.35);
+    border-radius: 30px;
+    text-align: center;
+    padding: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    backdrop-filter: blur(5px);
+}
+
+.restart-btn {
+    background: #ff5c7c;
+    width: 54px;
+    border-radius: 36px;
+    font-size: 24px;
+    border: none;
+    color: white;
+    cursor: pointer;
+    transition: 0.1s;
+}
+.restart-btn:active { transform: scale(0.95); }
+
+.turn-indicator {
+    text-align: center;
+    font-weight: 800;
+    font-size: 15px;
+    background: rgba(0,0,0,0.35);
+    margin: 8px 20px 6px;
+    border-radius: 60px;
+    padding: 8px;
+    backdrop-filter: blur(8px);
+}
+
+.board-wrapper {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 8px 16px max(12px, env(safe-area-inset-bottom));
+    min-height: 0;
+}
+
+#board {
+    width: min(92vw, 92vh);
+    height: min(92vw, 92vh);
+    max-width: 620px;
+    max-height: 620px;
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    grid-template-rows: repeat(8, 1fr);
+    gap: 8px;              /* чуть дальше друг от друга */
+    background: transparent;
+}
+
+.cell {
+    position: relative;
+    border-radius: 20px;
+    background: rgba(235, 225, 255, 0.12);
+    backdrop-filter: blur(2px);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    transition: all 0.18s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+    cursor: pointer;
+    overflow: hidden;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+}
+
+.cell:active {
+    transform: scale(0.94);
+}
+
+/* светлые тона для игроков */
+.cell.player {
+    background: #6d8eff;
+    background: linear-gradient(145deg, #7f9dff, #5b7aff);
+    box-shadow: 0 0 10px rgba(93, 123, 255, 0.5);
+    border-color: #c0d4ff;
+}
+
+.cell.bot {
+    background: #ff789c;
+    background: linear-gradient(145deg, #ff8aab, #ff5c82);
+    box-shadow: 0 0 10px rgba(255, 92, 125, 0.5);
+    border-color: #ffc0ce;
+}
+
+.cell.can {
+    box-shadow: 0 0 0 3px rgba(255, 245, 180, 0.9), 0 0 16px rgba(255,240,100,0.6);
+    border: 1px solid rgba(255,235,130,0.9);
+}
+
+/* точки — стилизация и анимация появления */
+.dots {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 6px;
+    pointer-events: none;
+}
+
+.dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: white;
+    box-shadow: 0 0 12px rgba(255,255,200,0.7);
+    animation: dotPop 0.2s ease-out;
+}
+
+@keyframes dotPop {
+    0% { transform: scale(0.2); opacity: 0; }
+    80% { transform: scale(1.2); }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+/* вспышка при захвате / взрыве */
+.explode-flash {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle, rgba(255,255,200,0.8), rgba(255,160,80,0));
+    border-radius: inherit;
+    pointer-events: none;
+    animation: flashAnim 0.25s forwards;
+    z-index: 2;
+}
+
+@keyframes flashAnim {
+    0% { opacity: 0.9; transform: scale(0.9);}
+    100% { opacity: 0; transform: scale(1.8);}
+}
+
+/* модалка конца игры */
+.game-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.8);
+    backdrop-filter: blur(10px);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.modern-modal {
+    background: #19142c;
+    width: min(80vw, 380px);
+    border-radius: 56px;
+    padding: 32px 20px;
+    text-align: center;
+    border: 1px solid rgba(255,215,0,0.4);
+    box-shadow: 0 25px 40px rgba(0,0,0,0.6);
+}
+
+.modern-modal h2 {
+    font-size: 40px;
+    font-weight: 900;
+    margin-bottom: 12px;
+}
+
+.modal-btn {
+    background: #ffb347;
+    margin-top: 28px;
+    border: none;
+    border-radius: 40px;
+    padding: 14px 0;
+    width: 100%;
+    font-weight: 800;
+    font-size: 18px;
+    color: #1a0f2a;
+    cursor: pointer;
+}
+
+@media (max-width: 520px) {
+    .dot {
+        width: 9px;
+        height: 9px;
     }
-
-    to{
-        opacity:1;
-        transform:none;
+    #board {
+        gap: 6px;
     }
-
-}
-
-.logo{
-
-    text-align:center;
-
-    font-size:58px;
-    font-weight:900;
-
-    line-height:0.9;
-
-    color:var(--text);
-
-    text-shadow:
-        0 5px 0 rgba(255,255,255,0.7);
-
-}
-
-.subtitle{
-
-    margin-top:18px;
-
-    text-align:center;
-
-    color:#5f5285;
-
-    font-size:17px;
-    line-height:1.5;
-
-}
-
-.section-title{
-
-    margin-top:26px;
-    margin-bottom:12px;
-
-    color:#5c4d85;
-
-    font-size:14px;
-    font-weight:800;
-
-    letter-spacing:1px;
-}
-
-.levels{
-
-    display:flex;
-    gap:10px;
-}
-
-.level-btn{
-
-    flex:1;
-
-    height:52px;
-
-    border:none;
-    border-radius:18px;
-
-    background:white;
-
-    color:#4d3c75;
-
-    font-weight:800;
-
-    cursor:pointer;
-
-    transition:0.18s;
-}
-
-.level-btn:active{
-    transform:scale(0.94);
-}
-
-.level-btn.active{
-
-    background:#7f6cff;
-    color:white;
-
-    box-shadow:
-        0 10px 25px rgba(127,108,255,0.35);
-
-}
-
-.mode{
-
-    width:100%;
-
-    height:56px;
-
-    margin-top:10px;
-
-    border:none;
-    border-radius:20px;
-
-    background:white;
-
-    color:#4e4173;
-
-    font-size:16px;
-    font-weight:700;
-
-    cursor:pointer;
-
-    transition:0.18s;
-}
-
-.mode:active{
-    transform:scale(0.97);
-}
-
-.mode.active{
-
-    background:#ff8eb7;
-    color:white;
-
-    box-shadow:
-        0 10px 25px rgba(255,142,183,0.35);
-
-}
-
-.start{
-
-    width:100%;
-    height:62px;
-
-    margin-top:28px;
-
-    border:none;
-    border-radius:24px;
-
-    background:
-        linear-gradient(
-            135deg,
-            #7c6cff,
-            #ff8db6
-        );
-
-    color:white;
-
-    font-size:22px;
-    font-weight:900;
-
-    cursor:pointer;
-
-    transition:0.18s;
-
-    box-shadow:
-        0 14px 35px rgba(113,92,255,0.35);
-
-}
-
-.start:active{
-    transform:scale(0.96);
-}
-
-/* GAME */
-
-#game{
-
-    position:absolute;
-    inset:0;
-
-    display:none;
-    flex-direction:column;
-
-    padding:
-        max(16px, env(safe-area-inset-top))
-        16px
-        max(16px, env(safe-area-inset-bottom));
-}
-
-.top{
-
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-}
-
-.score{
-
-    width:120px;
-
-    background:
-        rgba(255,255,255,0.55);
-
-    backdrop-filter:blur(16px);
-
-    border-radius:24px;
-
-    padding:14px;
-
-    text-align:center;
-}
-
-.score-title{
-
-    font-size:13px;
-    color:#6f6296;
-}
-
-.score-value{
-
-    margin-top:4px;
-
-    font-size:28px;
-    font-weight:900;
-
-    color:var(--text);
-}
-
-.turn{
-
-    text-align:center;
-
-    margin-top:12px;
-
-    color:#5c4d84;
-
-    font-weight:800;
-
-    font-size:18px;
-}
-
-.board-wrap{
-
-    flex:1;
-
-    display:flex;
-    justify-content:center;
-    align-items:center;
-
-    min-height:0;
-}
-
-#board{
-
-    width:min(88vw,88vh);
-    height:min(88vw,88vh);
-
-    display:grid;
-
-    grid-template-columns:repeat(8,1fr);
-    grid-template-rows:repeat(8,1fr);
-
-    gap:10px;
-}
-
-/* CELLS */
-
-.cell{
-
-    position:relative;
-
-    background:var(--cell);
-
-    border:
-        2px solid var(--cellBorder);
-
-    border-radius:24px;
-
-    overflow:hidden;
-
-    transition:
-        transform 0.12s,
-        background 0.3s,
-        box-shadow 0.3s;
-
-    box-shadow:
-        0 5px 14px rgba(120,95,165,0.08);
-
-}
-
-.cell:active{
-    transform:scale(0.92);
-}
-
-.cell.player{
-
-    background:#edf4ff;
-
-    box-shadow:
-        0 0 20px rgba(121,167,255,0.35);
-
-}
-
-.cell.bot{
-
-    background:#fff0f5;
-
-    box-shadow:
-        0 0 20px rgba(255,137,176,0.35);
-
-}
-
-.cell.can{
-
-    transform:translateY(-2px);
-
-}
-
-/* DOTS */
-
-.dots{
-
-    position:absolute;
-    inset:0;
-
-    display:flex;
-    justify-content:center;
-    align-items:center;
-
-    gap:6px;
-    flex-wrap:wrap;
-
-    padding:8px;
-}
-
-.dot{
-
-    width:12px;
-    height:12px;
-
-    border-radius:50%;
-
-    animation:pop 0.22s ease;
-
-}
-
-.dot.player{
-
-    background:var(--player);
-
-    box-shadow:
-        0 0 16px var(--playerGlow);
-
-}
-
-.dot.bot{
-
-    background:var(--bot);
-
-    box-shadow:
-        0 0 16px var(--botGlow);
-
-}
-
-@keyframes pop{
-
-    from{
-        transform:scale(0);
-        opacity:0;
+    .cell {
+        border-radius: 16px;
     }
-
-    to{
-        transform:scale(1);
-        opacity:1;
-    }
-
 }
-
-/* EXPLOSION */
-
-.explode{
-
-    animation:explode 0.35s ease;
-}
-
-@keyframes explode{
-
-    0%{
-        transform:scale(1);
-    }
-
-    30%{
-        transform:scale(1.15);
-    }
-
-    100%{
-        transform:scale(1);
-    }
-
-}
-
-/* WIN */
-
-#win{
-
-    position:absolute;
-    inset:0;
-
-    background:
-        rgba(255,255,255,0.55);
-
-    backdrop-filter:blur(18px);
-
-    display:none;
-    justify-content:center;
-    align-items:center;
-
-    z-index:20;
-}
-
-.win-card{
-
-    width:min(88vw,400px);
-
-    background:white;
-
-    border-radius:34px;
-
-    padding:34px 24px;
-
-    text-align:center;
-
-    box-shadow:
-        0 20px 45px rgba(85,63,131,0.18);
-
-}
-
-.win-title{
-
-    font-size:40px;
-    font-weight:900;
-
-    color:#48366e;
-}
-
-.win-btn{
-
-    width:100%;
-    height:60px;
-
-    margin-top:24px;
-
-    border:none;
-    border-radius:22px;
-
-    background:
-        linear-gradient(
-            135deg,
-            #7d6dff,
-            #ff90ba
-        );
-
-    color:white;
-
-    font-size:20px;
-    font-weight:900;
-}
-
-/* MOBILE */
-
-@media(max-width:480px){
-
-    .logo{
-        font-size:48px;
-    }
-
-    #board{
-        gap:8px;
-    }
-
-    .cell{
-        border-radius:20px;
-    }
-
-    .dot{
-        width:10px;
-        height:10px;
-    }
-
-}
-
 </style>
 </head>
-
 <body>
-
 <div id="app">
-
-    <div class="bg-circle bg1"></div>
-    <div class="bg-circle bg2"></div>
-
-    <!-- MENU -->
-
-    <div id="menu">
-
-        <div class="menu-card">
-
-            <div class="logo">
-                COLOR<br>
-                WARS
+    <!-- СТАРТОВЫЙ ЭКРАН (красивый с выбором сложности) -->
+    <div class="start-screen" id="startScreen">
+        <div class="start-card">
+            <div class="start-title">COLOR WARS</div>
+            <div class="start-sub">⚡ ЗАХВАТИ ПОЛЕ ⚡</div>
+            <div style="font-weight:500; margin:8px 0 0; opacity:0.9;">выбери сложность</div>
+            <div class="difficulty-panel" id="startDiffPanel">
+                <button class="diff-btn" data-diff="easy">🍃 ЛЁГКИЙ</button>
+                <button class="diff-btn" data-diff="medium">⚡ СРЕДНИЙ</button>
+                <button class="diff-btn" data-diff="hard">🔥 СЛОЖНЫЙ</button>
             </div>
-
-            <div class="subtitle">
-                Захвати всё поле своим цветом.<br>
-                Взрывай клетки и захватывай территорию.
-            </div>
-
-            <div class="section-title">
-                СЛОЖНОСТЬ
-            </div>
-
-            <div class="levels">
-
-                <button
-                class="level-btn active"
-                data-level="easy">
-                    ЛЕГКО
-                </button>
-
-                <button
-                class="level-btn"
-                data-level="medium">
-                    СРЕДНЕ
-                </button>
-
-                <button
-                class="level-btn"
-                data-level="hard">
-                    СЛОЖНО
-                </button>
-
-            </div>
-
-            <div class="section-title">
-                РЕЖИМ
-            </div>
-
-            <button
-            class="mode active">
-                ИГРА ПРОТИВ БОТА
-            </button>
-
-            <button class="start" id="startBtn">
-                ИГРАТЬ
-            </button>
-
+            <button class="start-btn" id="startGameBtn">⚔️ НАЧАТЬ БИТВУ ⚔️</button>
         </div>
-
     </div>
 
-    <!-- GAME -->
-
-    <div id="game">
-
-        <div class="top">
-
-            <div class="score">
-
-                <div class="score-title">
-                    ТЫ
-                </div>
-
-                <div class="score-value" id="playerScore">
-                    1
-                </div>
-
+    <!-- ИГРОВОЙ КОНТЕЙНЕР -->
+    <div class="game-container" id="gameContainer">
+        <div class="top-bar">
+            <div class="game-title">◈ COLOR WARS ◈</div>
+            <div class="stats-row">
+                <div class="stat-block"><div class="stat-label">ТЫ</div><div class="stat-value" id="playerScore">1</div></div>
+                <div class="stat-block"><div class="stat-label">БОТ</div><div class="stat-value" id="botScore">1</div></div>
             </div>
-
-            <div class="score">
-
-                <div class="score-title">
-                    БОТ
-                </div>
-
-                <div class="score-value" id="botScore">
-                    1
-                </div>
-
-            </div>
-
         </div>
-
-        <div class="turn" id="turnText">
-            ТВОЙ ХОД
+        <div class="quick-controls">
+            <div class="diff-tag" id="currentDiffLabel">ЛЕГКО</div>
+            <button class="restart-btn" id="gameRestartBtn">↻</button>
         </div>
-
-        <div class="board-wrap">
+        <div class="turn-indicator" id="turnText">ТВОЙ ХОД</div>
+        <div class="board-wrapper">
             <div id="board"></div>
         </div>
-
     </div>
-
-    <!-- WIN -->
-
-    <div id="win">
-
-        <div class="win-card">
-
-            <div
-            class="win-title"
-            id="winText">
-            </div>
-
-            <button
-            class="win-btn"
-            onclick="restartGame()">
-                СЫГРАТЬ СНОВА
-            </button>
-
-        </div>
-
-    </div>
-
 </div>
 
 <script>
+    (function(){
+        const tg = window.Telegram.WebApp;
+        tg.ready();
+        tg.expand();
+        document.body.classList.add("tg");
+        try { tg.disableVerticalSwipes(); } catch(e) {}
+        const viewH = tg.viewportHeight;
+        document.documentElement.style.height = viewH + "px";
+        document.body.style.height = viewH + "px";
 
-/* TELEGRAM */
+        // --- Константы ---
+        const SIZE = 8;
+        let board = [];
+        let turn = "player";
+        let gameOver = false;
+        let currentDifficulty = "easy";     // будет установлен из стартового меню
+        let pendingBotTimer = null;
 
-const tg = window.Telegram.WebApp;
+        // DOM элементы
+        const startScreenDiv = document.getElementById("startScreen");
+        const gameContainer = document.getElementById("gameContainer");
+        const boardEl = document.getElementById("board");
+        const playerScoreSpan = document.getElementById("playerScore");
+        const botScoreSpan = document.getElementById("botScore");
+        const turnTextSpan = document.getElementById("turnText");
+        const currentDiffSpan = document.getElementById("currentDiffLabel");
+        const gameRestartBtn = document.getElementById("gameRestartBtn");
 
-tg.ready();
-tg.expand();
+        // скорость бота
+        const SPEED = { easy: 680, medium: 380, hard: 200 };
 
-try{
-    tg.requestFullscreen();
-}catch(e){}
+        // --- вспомогательные функции ---
+        function getDifficultyText() {
+            if(currentDifficulty === "easy") return "🍃 ЛЕГКО";
+            if(currentDifficulty === "medium") return "⚡ СРЕДНЕ";
+            return "🔥 СЛОЖНО";
+        }
 
-try{
-    tg.disableVerticalSwipes();
-}catch(e){}
+        // создать новую доску (базовое состояние)
+        function initBoard() {
+            board = Array(SIZE).fill().map(() => Array(SIZE).fill().map(() => ({ owner: null, value: 0 })));
+            board[0][0] = { owner: "player", value: 1 };
+            board[7][7] = { owner: "bot", value: 1 };
+        }
 
-/* GAME */
+        // очистить таймер бота
+        function clearBotTimer() {
+            if(pendingBotTimer) {
+                clearTimeout(pendingBotTimer);
+                pendingBotTimer = null;
+            }
+        }
 
-const SIZE = 8;
+        // эффект вспышки на клетке (для взрыва/захвата)
+        function addFlashEffect(x,y) {
+            const cells = document.querySelectorAll("#board .cell");
+            const idx = y * SIZE + x;
+            if(cells[idx]) {
+                const flashDiv = document.createElement("div");
+                flashDiv.className = "explode-flash";
+                cells[idx].style.position = "relative";
+                cells[idx].appendChild(flashDiv);
+                setTimeout(() => { if(flashDiv) flashDiv.remove(); }, 250);
+            }
+        }
 
-const boardEl =
-document.getElementById("board");
+        // каскадный взрыв с анимацией вспышек
+        function explodeChain(x, y, owner, flashStack = []) {
+            const cell = board[y][x];
+            if(!cell) return;
+            // запоминаем для эффекта
+            flashStack.push([x,y]);
+            cell.value = 0;
+            cell.owner = null;
+            const dirs = [[1,0],[-1,0],[0,1],[0,-1]];
+            for(let [dx,dy] of dirs) {
+                const nx = x+dx, ny = y+dy;
+                if(nx>=0 && ny>=0 && nx<SIZE && ny<SIZE) {
+                    const neighbor = board[ny][nx];
+                    neighbor.owner = owner;
+                    neighbor.value++;
+                    if(neighbor.value >= 4) {
+                        explodeChain(nx, ny, owner, flashStack);
+                    }
+                }
+            }
+            // после рекурсии воспроизводим вспышки (для зрелищности)
+            if(flashStack.length) {
+                for(let [fx,fy] of flashStack) addFlashEffect(fx,fy);
+            }
+        }
 
-const gameEl =
-document.getElementById("game");
+        // действие: добавляем точку, обрабатываем взрыв
+        function performAction(x, y, owner, isBotTrigger = false) {
+            const cell = board[y][x];
+            if(!cell) return;
+            // Если клетка принадлежит противнику - захват происходит только через взрыв, но по логике старой игры мы разрешаем ставить точку на врага? По классике можно ставить на любую не свою? но чаще "на свои либо пустые".
+            // условие: в оригинале игрок может кликнуть на свою или пустую (но для бота мы разрешаем на любую не вражескую? В оригинале алгоритм бота выбирал клетки null или bot. Допишем единообразие: человек может только по пустым или своим. Бот - по своим или пустым.
+            if(owner === "player" && cell.owner === "bot") return; // нельзя взять вражескую нажатием
 
-const menuEl =
-document.getElementById("menu");
+            cell.owner = owner;
+            cell.value++;
 
-const winEl =
-document.getElementById("win");
+            // эффект добавления точки (визуальный)
+            addFlashEffect(x,y);
 
-const winText =
-document.getElementById("winText");
+            if(cell.value >= 4) {
+                // взрыв
+                explodeChain(x, y, owner, []);
+                // после взрыва не забудем проверить лишний раз рендер
+            }
+        }
 
-const playerScore =
-document.getElementById("playerScore");
+        // полный рендер + счетчик + проверка победы
+        function renderGame() {
+            boardEl.innerHTML = "";
+            let playerCells = 0, botCells = 0;
+            for(let y=0; y<SIZE; y++) {
+                for(let x=0; x<SIZE; x++) {
+                    const cell = board[y][x];
+                    if(cell.owner === "player") playerCells++;
+                    if(cell.owner === "bot") botCells++;
+                    const div = document.createElement("div");
+                    div.className = "cell";
+                    if(cell.owner) div.classList.add(cell.owner);
+                    // Подсветка возможных ходов для игрока
+                    if(!gameOver && turn === "player" && (cell.owner === "player" || cell.owner === null)) {
+                        div.classList.add("can");
+                    }
+                    const dotsWrap = document.createElement("div");
+                    dotsWrap.className = "dots";
+                    let val = cell.value;
+                    if(val > 8) val = 8; // для визуала не больше 8 точек, но не влияет на логику
+                    for(let i=0; i<val; i++) {
+                        const dotSpan = document.createElement("div");
+                        dotSpan.className = "dot";
+                        dotsWrap.appendChild(dotSpan);
+                    }
+                    div.appendChild(dotsWrap);
+                    div.onclick = (function(xx,yy){ return function(){ onCellClick(xx,yy); }; })(x,y);
+                    boardEl.appendChild(div);
+                }
+            }
+            playerScoreSpan.innerText = playerCells;
+            botScoreSpan.innerText = botCells;
 
-const botScore =
-document.getElementById("botScore");
+            turnTextSpan.innerText = (turn === "player") ? "✨ ТВОЙ ХОД ✨" : "🤖 БОТ АНАЛИЗИРУЕТ...";
 
-const turnText =
-document.getElementById("turnText");
+            if(!gameOver) {
+                if(playerCells === 0) endMatch("🤖 ПОБЕДА БОТА");
+                else if(botCells === 0) endMatch("🏆 ТЫ ПОБЕДИЛ!");
+            }
+        }
 
-let difficulty = "easy";
+        function onCellClick(x,y) {
+            if(gameOver) return;
+            if(turn !== "player") return;
+            const cell = board[y][x];
+            if(cell.owner === "bot") return; // нельзя захватить врага кликом
+            // действуем
+            performAction(x, y, "player");
+            // проверка победы после действия
+            let pCount=0, bCount=0;
+            for(let i=0;i<SIZE;i++) for(let j=0;j<SIZE;j++) {
+                if(board[i][j].owner==="player") pCount++;
+                if(board[i][j].owner==="bot") bCount++;
+            }
+            if(pCount===0 || bCount===0) {
+                renderGame();
+                if(pCount===0) endMatch("🤖 ПОБЕДА БОТА");
+                else if(bCount===0) endMatch("🏆 ТЫ ПОБЕДИЛ!");
+                return;
+            }
+            turn = "bot";
+            renderGame();
+            clearBotTimer();
+            pendingBotTimer = setTimeout(() => botTurn(), SPEED[currentDifficulty]);
+        }
 
-let board = [];
+        // бот выбирает лучшую клетку
+        function botTurn() {
+            if(gameOver) return;
+            if(turn !== "bot") return;
 
-let turn = "player";
+            let candidates = [];
+            for(let y=0; y<SIZE; y++) {
+                for(let x=0; x<SIZE; x++) {
+                    const c = board[y][x];
+                    if(c.owner === "bot" || c.owner === null) {
+                        let score = Math.random() * 5;
+                        if(currentDifficulty === "medium") {
+                            score += c.value * 2.3;
+                        }
+                        if(currentDifficulty === "hard") {
+                            score += c.value * 4.5;
+                            // близость к игроку
+                            let nearPlayerFlag = false;
+                            const dirs = [[1,0],[-1,0],[0,1],[0,-1]];
+                            for(let [dx,dy] of dirs) {
+                                const nx=x+dx, ny=y+dy;
+                                if(nx>=0 && ny>=0 && nx<SIZE && ny<SIZE && board[ny][nx].owner === "player") {
+                                    nearPlayerFlag = true; break;
+                                }
+                            }
+                            if(nearPlayerFlag) score += 9;
+                        } else if(currentDifficulty === "easy") {
+                            score += c.value * 0.9;
+                        }
+                        candidates.push({x,y,score});
+                    }
+                }
+            }
+            if(candidates.length === 0) {
+                // если нет ходов, переключить ход чтобы не зависнуть
+                turn = "player";
+                renderGame();
+                return;
+            }
+            candidates.sort((a,b)=>b.score - a.score);
+            const best = candidates[0];
+            performAction(best.x, best.y, "bot");
+            let pCount=0, bCount=0;
+            for(let i=0;i<SIZE;i++) for(let j=0;j<SIZE;j++) {
+                if(board[i][j].owner==="player") pCount++;
+                if(board[i][j].owner==="bot") bCount++;
+            }
+            renderGame();
+            if(pCount===0 || bCount===0) {
+                if(pCount===0) endMatch("🤖 ПОБЕДА БОТА");
+                else if(bCount===0) endMatch("🏆 ТЫ ПОБЕДИЛ!");
+                return;
+            }
+            turn = "player";
+            renderGame();
+            clearBotTimer();
+            pendingBotTimer = null;
+        }
 
-let gameOver = false;
+        function endMatch(message) {
+            if(gameOver) return;
+            gameOver = true;
+            clearBotTimer();
+            const existingOverlay = document.querySelector(".game-overlay");
+            if(existingOverlay) existingOverlay.remove();
+            const overlay = document.createElement("div");
+            overlay.className = "game-overlay";
+            overlay.innerHTML = `
+                <div class="modern-modal">
+                    <h2>${message}</h2>
+                    <div style="opacity:0.8; margin:10px 0;">Сыграем новую битву?</div>
+                    <button class="modal-btn" id="rematchBtn">⚔️ НОВАЯ ИГРА ⚔️</button>
+                </div>
+            `;
+            document.body.appendChild(overlay);
+            document.getElementById("rematchBtn").onclick = () => {
+                overlay.remove();
+                fullRestartGame();
+            };
+        }
 
-/* LEVELS */
+        function fullRestartGame() {
+            gameOver = false;
+            clearBotTimer();
+            initBoard();
+            turn = "player";
+            renderGame();
+        }
 
-document
-.querySelectorAll(".level-btn")
-.forEach(btn=>{
+        // запуск игры после стартового экрана
+        function startGame(selectedDiff) {
+            currentDifficulty = selectedDiff;
+            currentDiffSpan.innerText = getDifficultyText();
+            initBoard();
+            turn = "player";
+            gameOver = false;
+            clearBotTimer();
+            renderGame();
+            // переключить экраны
+            startScreenDiv.classList.add("fade-out");
+            setTimeout(() => {
+                startScreenDiv.style.display = "none";
+                gameContainer.classList.add("active");
+            }, 500);
+        }
 
-    btn.onclick = ()=>{
-
-        document
-        .querySelectorAll(".level-btn")
-        .forEach(x=>
-            x.classList.remove("active")
-        );
-
-        btn.classList.add("active");
-
-        difficulty =
-        btn.dataset.level;
-
-    };
-
-});
-
-/* START */
-
-document
-.getElementById("startBtn")
-.onclick = ()=>{
-
-    menuEl.style.display = "none";
-
-    gameEl.style.display = "flex";
-
-    createGame();
-
-};
-
-/* CREATE */
-
-function createGame(){
-
-    gameOver = false;
-
-    turn = "player";
-
-    board = [];
-
-    for(let y=0;y<SIZE;y++){
-
-        let row = [];
-
-        for(let x=0;x<SIZE;x++){
-
-            row.push({
-
-                owner:null,
-                value:0
-
+        // обработка выбора сложности на стартовом экране
+        let chosenDifficulty = "easy";
+        const diffBtnsStart = document.querySelectorAll("#startDiffPanel .diff-btn");
+        diffBtnsStart.forEach(btn => {
+            btn.addEventListener("click", () => {
+                diffBtnsStart.forEach(b => b.classList.remove("active"));
+                btn.classList.add("active");
+                chosenDifficulty = btn.getAttribute("data-diff");
             });
+        });
+        // активировать дефолт лёгкий
+        document.querySelector("#startDiffPanel .diff-btn[data-diff='easy']").classList.add("active");
+        chosenDifficulty = "easy";
 
-        }
+        document.getElementById("startGameBtn").addEventListener("click", () => {
+            startGame(chosenDifficulty);
+        });
 
-        board.push(row);
-
-    }
-
-    board[0][0] = {
-
-        owner:"player",
-        value:1
-
-    };
-
-    board[7][7] = {
-
-        owner:"bot",
-        value:1
-
-    };
-
-    render();
-
-}
-
-/* RENDER */
-
-function render(){
-
-    boardEl.innerHTML = "";
-
-    let player = 0;
-    let bot = 0;
-
-    for(let y=0;y<SIZE;y++){
-
-        for(let x=0;x<SIZE;x++){
-
-            const cell =
-            board[y][x];
-
-            if(cell.owner==="player")
-                player++;
-
-            if(cell.owner==="bot")
-                bot++;
-
-            const div =
-            document.createElement("div");
-
-            div.className = "cell";
-
-            if(cell.owner)
-                div.classList.add(cell.owner);
-
-            if(
-                turn==="player" &&
-                (
-                    cell.owner==="player" ||
-                    cell.owner===null
-                )
-            ){
-                div.classList.add("can");
+        // перезапуск внутри игры
+        gameRestartBtn.addEventListener("click", () => {
+            if(gameOver) {
+                fullRestartGame();
+            } else {
+                fullRestartGame();
             }
-
-            const dots =
-            document.createElement("div");
-
-            dots.className = "dots";
-
-            for(let i=0;i<cell.value;i++){
-
-                const dot =
-                document.createElement("div");
-
-                dot.className =
-                "dot " + cell.owner;
-
-                dots.appendChild(dot);
-
+            // также если игра активна — перезапуск
+            clearBotTimer();
+            if(turn === "bot") {
+                // отменяем ход бота
+                turn = "player";
             }
-
-            div.appendChild(dots);
-
-            div.onclick =
-            ()=>move(x,y);
-
-            boardEl.appendChild(div);
-
-        }
-
-    }
-
-    playerScore.textContent = player;
-    botScore.textContent = bot;
-
-    turnText.textContent =
-        turn==="player"
-        ? "ТВОЙ ХОД"
-        : "БОТ ДУМАЕТ...";
-
-    checkWin(player,bot);
-
-}
-
-/* MOVE */
-
-function move(x,y){
-
-    if(gameOver) return;
-
-    if(turn!=="player") return;
-
-    const cell =
-    board[y][x];
-
-    if(
-        cell.owner!==null &&
-        cell.owner!=="player"
-    ) return;
-
-    animateMove(x,y,"player");
-
-    turn = "bot";
-
-    setTimeout(()=>{
-
-        botMove();
-
-    },550);
-
-}
-
-/* ANIMATION */
-
-function animateMove(x,y,owner){
-
-    const cells =
-    document.querySelectorAll(".cell");
-
-    const index =
-    y * SIZE + x;
-
-    const cellEl =
-    cells[index];
-
-    if(cellEl){
-
-        cellEl.classList.add("explode");
-
-        setTimeout(()=>{
-
-            cellEl.classList.remove("explode");
-
-        },300);
-
-    }
-
-    action(x,y,owner);
-
-}
-
-/* ACTION */
-
-function action(x,y,owner){
-
-    const cell =
-    board[y][x];
-
-    cell.owner = owner;
-
-    cell.value++;
-
-    if(cell.value >= 4){
-
-        explode(x,y,owner);
-
-    }
-
-    render();
-
-}
-
-/* EXPLOSION */
-
-function explode(x,y,owner){
-
-    board[y][x].value = 0;
-    board[y][x].owner = null;
-
-    const dirs = [
-
-        [1,0],
-        [-1,0],
-        [0,1],
-        [0,-1]
-
-    ];
-
-    for(const d of dirs){
-
-        const nx =
-        x + d[0];
-
-        const ny =
-        y + d[1];
-
-        if(
-            nx>=0 &&
-            ny>=0 &&
-            nx<SIZE &&
-            ny<SIZE
-        ){
-
-            board[ny][nx].owner =
-            owner;
-
-            board[ny][nx].value++;
-
-            if(
-                board[ny][nx].value >= 4
-            ){
-
-                explode(nx,ny,owner);
-
-            }
-
-        }
-
-    }
-
-}
-
-/* BOT */
-
-function botMove(){
-
-    if(gameOver) return;
-
-    let moves = [];
-
-    for(let y=0;y<SIZE;y++){
-
-        for(let x=0;x<SIZE;x++){
-
-            const c =
-            board[y][x];
-
-            if(
-                c.owner===null ||
-                c.owner==="bot"
-            ){
-
-                let score =
-                Math.random();
-
-                if(difficulty==="medium"){
-
-                    score += c.value*2;
-
-                }
-
-                if(difficulty==="hard"){
-
-                    score += c.value*5;
-
-                }
-
-                moves.push({
-                    x,y,score
-                });
-
-            }
-
-        }
-
-    }
-
-    moves.sort(
-        (a,b)=>b.score-a.score
-    );
-
-    const best =
-    moves[0];
-
-    animateMove(
-        best.x,
-        best.y,
-        "bot"
-    );
-
-    turn = "player";
-
-    render();
-
-}
-
-/* WIN */
-
-function checkWin(player,bot){
-
-    if(player===0){
-
-        finish("ПОБЕДИЛ БОТ");
-
-    }
-
-    if(bot===0){
-
-        finish("ТЫ ПОБЕДИЛ");
-
-    }
-
-}
-
-/* FINISH */
-
-function finish(text){
-
-    gameOver = true;
-
-    winText.textContent =
-    text;
-
-    winEl.style.display =
-    "flex";
-
-}
-
-/* RESTART */
-
-function restartGame(){
-
-    winEl.style.display =
-    "none";
-
-    createGame();
-
-}
-
+        });
+
+        // Предотвращаем случайное нажатие в стартовом экране
+        window.fullRestartGame = fullRestartGame;
+        // инициализация скрытого состояния
+        initBoard();
+        renderGame();
+        gameContainer.classList.remove("active");
+        startScreenDiv.style.display = "flex";
+        startScreenDiv.classList.remove("fade-out");
+    })();
 </script>
-
 </body>
 </html>
